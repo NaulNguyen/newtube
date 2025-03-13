@@ -1,6 +1,9 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
     const SIGNING_SECRET = process.env.CLERK_SIGNING_SECRET;
@@ -49,10 +52,39 @@ export async function POST(req: Request) {
 
     // Do something with payload
     // For this guide, log payload to console
-    const { id } = evt.data;
     const eventType = evt.type;
-    console.log(`Received webhook with ID ${id} and event type of ${eventType}`);
-    console.log("Webhook payload:", body);
+
+    if (eventType === "user.created") {
+        const { data } = evt;
+
+        await db.insert(users).values({
+            clerckId: data.id,
+            name: `${data.first_name} ${data.last_name}`,
+            imageUrl: data.image_url,
+        });
+    }
+
+    if (eventType === "user.deleted") {
+        const { data } = evt;
+
+        if (!data.id) {
+            return new Response("Missing user id", { status: 400 });
+        }
+
+        await db.delete(users).where(eq(users.clerckId, data.id));
+    }
+
+    if (eventType === "user.updated") {
+        const { data } = evt;
+
+        await db
+            .update(users)
+            .set({
+                name: `${data.first_name} ${data.last_name}`,
+                imageUrl: data.image_url,
+            })
+            .where(eq(users.clerckId, data.id));
+    }
 
     return new Response("Webhook received", { status: 200 });
 }

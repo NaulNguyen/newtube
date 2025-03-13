@@ -1,5 +1,13 @@
-import Image from "next/image";
+"use client";
+
+import { trpc } from "@/trpc/client";
 
 export default function Home() {
-    return <p>I will load video later</p>;
+    const { data } = trpc.hello.useQuery({ text: "Minh Luan" });
+
+    return (
+        <div>
+            <h1>Client component: {data?.greeting}</h1>
+        </div>
+    );
 }
