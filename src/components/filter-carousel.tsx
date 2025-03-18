@@ -67,7 +67,7 @@ export const FilterCarousel = ({ value, onSelect, isLoading, data }: FilterCarou
                     {isLoading &&
                         Array.from({ length: 14 }).map((_, index) => (
                             <CarouselItem key={index} className="pl-3 basis-auto">
-                                <Skeleton className="rounded-lg px-3 py-1 h-full text-sm w-[1000px] font-bold">
+                                <Skeleton className="rounded-lg px-3 py-1 h-full text-sm w-[100px] font-bold">
                                     &nbsp;
                                 </Skeleton>
                             </CarouselItem>
